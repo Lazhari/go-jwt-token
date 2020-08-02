@@ -18,24 +18,27 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
-		err := models.Error{}
+		err := models.RequestError{}
 		json.NewDecoder(r.Body).Decode(&user)
 
 		if user.Email == "" {
 			err.Message = "Email is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, err)
+			err.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, err)
 			return
 		}
 
 		if !utils.IsEmailValid(user.Email) {
 			err.Message = "Email is not valid."
-			utils.RespondWithError(w, http.StatusBadRequest, err)
+			err.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, err)
 			return
 		}
 
 		if user.Password == "" {
 			err.Message = "Password is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, err)
+			err.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, err)
 			return
 		}
 
@@ -44,7 +47,8 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 		if errHash != nil {
 			log.Printf("Error while hashing the password: %v\n", errHash)
 			err.Message = "Internal Server Error"
-			utils.RespondWithError(w, http.StatusInternalServerError, err)
+			err.StatusCode = http.StatusInternalServerError
+			utils.RespondWithError(w, err)
 		}
 		user.Password = string(hash)
 
@@ -54,7 +58,8 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 		if errInsert != nil {
 			log.Printf("Error while inserting the user into db: %v\n", errInsert)
 			err.Message = "Internal server error"
-			utils.RespondWithError(w, http.StatusInternalServerError, err)
+			err.StatusCode = http.StatusInternalServerError
+			utils.RespondWithError(w, err)
 			return
 		}
 
@@ -67,19 +72,21 @@ func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 		jwt := models.JWT{}
-		error := models.Error{}
+		error := models.RequestError{}
 
 		json.NewDecoder(r.Body).Decode(&user)
 
 		if user.Email == "" {
 			error.Message = "Email is missing."
-			utils.RespondWithError(w, http.StatusBadRequest, error)
+			error.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, error)
 			return
 		}
 
 		if user.Password == "" {
 			error.Message = "Password is missing"
-			utils.RespondWithError(w, http.StatusBadRequest, error)
+			error.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, error)
 			return
 		}
 
@@ -90,15 +97,14 @@ func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
 		user, err := userRepo.Login(db, user)
 
 		if err != nil {
-			var status int
 			if err == sql.ErrNoRows {
 				error.Message = "The user does not exist"
-				status = http.StatusNotFound
+				error.StatusCode = http.StatusNotFound
 			} else {
 				error.Message = err.Error()
-				status = http.StatusInternalServerError
+				error.StatusCode = http.StatusInternalServerError
 			}
-			utils.RespondWithError(w, status, error)
+			utils.RespondWithError(w, error)
 			return
 		}
 
@@ -108,7 +114,8 @@ func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
 
 		if !ok {
 			error.Message = "The password isn't valid"
-			utils.RespondWithError(w, http.StatusUnauthorized, error)
+			error.StatusCode = http.StatusUnauthorized
+			utils.RespondWithError(w, error)
 			return
 		}
 
@@ -116,7 +123,8 @@ func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
 
 		if err != nil {
 			error.Message = err.Error()
-			utils.RespondWithError(w, http.StatusInternalServerError, error)
+			error.StatusCode = http.StatusInternalServerError
+			utils.RespondWithError(w, error)
 			return
 		}
 		jwt.Token = token

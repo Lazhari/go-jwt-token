@@ -14,7 +14,7 @@ import (
 // IsAuthenticated middleware that verify the user if he's authenticated
 func IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errorObject := models.Error{}
+		errorObject := models.RequestError{}
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
 
@@ -31,7 +31,8 @@ func IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 
 			if error != nil {
 				errorObject.Message = "Invalid token"
-				utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+				errorObject.StatusCode = http.StatusUnauthorized
+				utils.RespondWithError(w, errorObject)
 				return
 			}
 
@@ -39,12 +40,14 @@ func IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 				next.ServeHTTP(w, r)
 			} else {
 				errorObject.Message = "Invalid token"
-				utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+				errorObject.StatusCode = http.StatusUnauthorized
+				utils.RespondWithError(w, errorObject)
 				return
 			}
 		} else {
 			errorObject.Message = "Invalid token."
-			utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+			errorObject.StatusCode = http.StatusUnauthorized
+			utils.RespondWithError(w, errorObject)
 			return
 		}
 	})
