@@ -10,6 +10,7 @@ import (
 
 var db *sql.DB
 
+// ConnectDB establish the database connection
 func ConnectDB() *sql.DB {
 	pgURL, err := pq.ParseURL(os.Getenv("DB_URI"))
 
