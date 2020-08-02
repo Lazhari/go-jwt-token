@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/lazhari/web-jwt/models"
@@ -22,6 +23,7 @@ func ResponseJSON(w http.ResponseWriter, data interface{}) {
 	json.NewEncoder(w).Encode(data)
 }
 
+// ComparePasswords Check the user password
 func ComparePasswords(hashedPassword string, password []byte) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 
@@ -33,12 +35,14 @@ func ComparePasswords(hashedPassword string, password []byte) bool {
 	return true
 }
 
+// GenerateToken Generate a new toke
 func GenerateToken(user models.User) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 
 	claims := jwt.MapClaims{
 		"email": user.Email,
 		"iss":   "course",
+		"exp":   time.Now().Add(time.Hour * 40).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
