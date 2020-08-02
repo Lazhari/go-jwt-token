@@ -14,7 +14,7 @@ import (
 // IsAuthenticated middleware that verify the user if he's authenticated
 func IsAuthenticated(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		errorObject := models.RequestError{}
+		errorObject := &models.RequestError{}
 		authHeader := r.Header.Get("Authorization")
 		bearerToken := strings.Split(authHeader, " ")
 

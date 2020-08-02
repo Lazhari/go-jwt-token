@@ -6,6 +6,6 @@ type RequestError struct {
 	StatusCode int    `json:"status"`
 }
 
-func (r RequestError) Error() string {
+func (r *RequestError) Error() string {
 	return r.Message
 }

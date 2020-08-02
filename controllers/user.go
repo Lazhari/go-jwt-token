@@ -18,7 +18,7 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
-		err := models.RequestError{}
+		err := &models.RequestError{}
 		json.NewDecoder(r.Body).Decode(&user)
 
 		if user.Email == "" {
@@ -72,7 +72,7 @@ func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 		jwt := models.JWT{}
-		error := models.RequestError{}
+		error := &models.RequestError{}
 
 		json.NewDecoder(r.Body).Decode(&user)
 
