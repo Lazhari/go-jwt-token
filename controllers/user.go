@@ -52,7 +52,7 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 		}
 		user.Password = string(hash)
 
-		userRepo := userRepository.UserRepository{}
+		userRepo := userRepository.Repository{}
 		user, errInsert := userRepo.SignUp(db, user)
 
 		if errInsert != nil {
@@ -92,19 +92,12 @@ func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
 
 		password := user.Password
 
-		userRepo := userRepository.UserRepository{}
+		userRepo := userRepository.Repository{}
 
 		user, err := userRepo.Login(db, user)
 
 		if err != nil {
-			if err == sql.ErrNoRows {
-				error.Message = "The user does not exist"
-				error.StatusCode = http.StatusNotFound
-			} else {
-				error.Message = err.Error()
-				error.StatusCode = http.StatusInternalServerError
-			}
-			utils.RespondWithError(w, error)
+			utils.RespondWithError(w, err)
 			return
 		}
 

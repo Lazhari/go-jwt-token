@@ -13,8 +13,13 @@ import (
 )
 
 // RespondWithError Response with an error
-func RespondWithError(w http.ResponseWriter, err models.RequestError) {
-	w.WriteHeader(err.StatusCode)
+func RespondWithError(w http.ResponseWriter, err error) {
+	switch error := err.(type) {
+	case models.RequestError:
+		w.WriteHeader(error.StatusCode)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 	json.NewEncoder(w).Encode(err)
 }
 
@@ -51,7 +56,7 @@ func GenerateToken(user models.User) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(secret))
 	if err != nil {
-		return "", &models.RequestError{
+		return "", models.RequestError{
 			StatusCode: http.StatusInternalServerError,
 			Message:    "Internal server Error",
 		}
