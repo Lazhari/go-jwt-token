@@ -27,6 +27,12 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
+		if !utils.IsEmailValid(user.Email) {
+			err.Message = "Email is not valid."
+			utils.RespondWithError(w, http.StatusBadRequest, err)
+			return
+		}
+
 		if user.Password == "" {
 			err.Message = "Password is missing."
 			utils.RespondWithError(w, http.StatusBadRequest, err)
