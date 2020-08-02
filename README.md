@@ -1,4 +1,4 @@
-# JWT Token Auth with Go
+# Build JWT Authenticated Restful API with Go
 
 ## User table
 
