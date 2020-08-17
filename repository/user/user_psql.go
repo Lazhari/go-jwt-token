@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/jinzhu/gorm"
 	"github.com/lazhari/web-jwt/models"
 )
 
@@ -11,13 +12,15 @@ import (
 type Repository struct{}
 
 // SignUp Create a user row in the users table
-func (u Repository) SignUp(db *sql.DB, user models.User) (models.User, error) {
-	stmt := "INSERT INTO users (email, password) values($1, $2) RETURNING id;"
+func (u Repository) SignUp(db *gorm.DB, user models.User) (models.User, error) {
+	// stmt := "INSERT INTO users (email, password) values($1, $2) RETURNING id;"
 
-	err := db.QueryRow(stmt, user.Email, user.Password).Scan(&user.ID)
+	// err := db.QueryRow(stmt, user.Email, user.Password).Scan(&user.ID)
 
-	if err != nil {
-		return user, err
+	dbc := db.Create(&user)
+
+	if dbc.Error != nil {
+		return user, dbc.Error
 	}
 
 	user.Password = ""
@@ -25,17 +28,19 @@ func (u Repository) SignUp(db *sql.DB, user models.User) (models.User, error) {
 }
 
 // Login Get the user from the users table
-func (u Repository) Login(db *sql.DB, user models.User) (models.User, error) {
-	row := db.QueryRow("SELECT * FROM users WHERE email=$1", user.Email)
-	err := row.Scan(&user.ID, &user.Email, &user.Password)
+func (u Repository) Login(db *gorm.DB, user models.User) (models.User, error) {
+	// row := db.QueryRow("SELECT * FROM users WHERE email=$1", user.Email)
+	// err := row.Scan(&user.ID, &user.Email, &user.Password)
 
-	if err != nil {
+	dbc := db.First(&user, "email = ?", user.Email)
+
+	if dbc.Error != nil {
 		errorReq := &models.RequestError{}
-		if err == sql.ErrNoRows {
+		if dbc.Error == sql.ErrNoRows {
 			errorReq.Message = "The user does not exist!"
 			errorReq.StatusCode = http.StatusNotFound
 		} else {
-			errorReq.Message = err.Error()
+			errorReq.Message = dbc.Error.Error()
 			errorReq.StatusCode = http.StatusInternalServerError
 		}
 		return user, errorReq

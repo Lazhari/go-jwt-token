@@ -1,27 +1,29 @@
 package driver
 
 import (
-	"database/sql"
 	"log"
-	"os"
 
-	"github.com/lib/pq"
+	"github.com/lazhari/web-jwt/models"
+
+	"github.com/jinzhu/gorm"
+	// Gorm postgres connector
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
-var db *sql.DB
+var db *gorm.DB
 
 // ConnectDB establish the database connection
-func ConnectDB() *sql.DB {
-	pgURL, err := pq.ParseURL(os.Getenv("DB_URI"))
+func ConnectDB() *gorm.DB {
+	// pgURL, err := pq.ParseURL(os.Getenv("DB_URI"))
+
+	// Establish connection
+	db, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres dbname=jwt-test password=toor sslmode=disable")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err = sql.Open("postgres", pgURL)
-	if err != nil {
-		log.Fatal(err)
-	}
+	db.AutoMigrate(&models.User{})
 
 	return db
 }

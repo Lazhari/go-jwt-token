@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
 
+	"github.com/jinzhu/gorm"
 	userRepository "github.com/lazhari/web-jwt/repository/user"
 
 	"github.com/lazhari/web-jwt/models"
@@ -14,7 +14,7 @@ import (
 )
 
 // SignUpHandler The user sign up handler
-func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
+func (c Controller) SignUpHandler(db *gorm.DB) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
@@ -68,7 +68,7 @@ func (c Controller) SignUpHandler(db *sql.DB) http.HandlerFunc {
 }
 
 // LoginHandler The login handler
-func (c Controller) LoginHandler(db *sql.DB) http.HandlerFunc {
+func (c Controller) LoginHandler(db *gorm.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 		jwt := models.JWT{}

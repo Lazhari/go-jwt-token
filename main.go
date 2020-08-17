@@ -1,11 +1,11 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/jinzhu/gorm"
 	"github.com/lazhari/web-jwt/controllers"
 
 	"github.com/lazhari/web-jwt/middleware"
@@ -20,7 +20,7 @@ func init() {
 	gotenv.Load()
 }
 
-var db *sql.DB
+var db *gorm.DB
 
 func main() {
 	db = driver.ConnectDB()
