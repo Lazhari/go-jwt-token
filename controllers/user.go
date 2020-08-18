@@ -28,6 +28,20 @@ func (c Controller) SignUpHandler(db *gorm.DB) http.HandlerFunc {
 			return
 		}
 
+		if user.FirstName == "" {
+			err.Message = "The first name is required."
+			err.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, err)
+			return
+		}
+
+		if user.LastName == "" {
+			err.Message = "The last name is required."
+			err.StatusCode = http.StatusBadRequest
+			utils.RespondWithError(w, err)
+			return
+		}
+
 		if !utils.IsEmailValid(user.Email) {
 			err.Message = "Email is not valid."
 			err.StatusCode = http.StatusBadRequest
