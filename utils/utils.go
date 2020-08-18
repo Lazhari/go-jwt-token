@@ -46,6 +46,7 @@ func GenerateToken(user models.User) (string, error) {
 
 	claims := jwt.MapClaims{
 		"email": user.Email,
+		"id":    user.ID,
 		"iss":   "course",
 		"sub":   "user",
 		"iat":   time.Now().Unix(),
