@@ -7,6 +7,7 @@ require (
 	github.com/coreos/etcd v3.3.22+incompatible
 	github.com/davecgh/go-spew v1.1.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/mux v1.7.4
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lib/pq v1.8.0
