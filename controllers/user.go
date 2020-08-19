@@ -15,7 +15,6 @@ import (
 
 // SignUpHandler The user sign up handler
 func (c Controller) SignUpHandler(db *gorm.DB) http.HandlerFunc {
-
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := models.User{}
 		err := &models.RequestError{}
