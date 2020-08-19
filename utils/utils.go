@@ -64,3 +64,18 @@ func GenerateToken(user models.User) (string, error) {
 	}
 	return tokenString, nil
 }
+
+// ParseToken get the user id from the token
+func ParseToken(tokenStr string) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		return secret, nil
+	})
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		id := claims["id"].(string)
+		return id, nil
+	}
+
+	return "", err
+}
