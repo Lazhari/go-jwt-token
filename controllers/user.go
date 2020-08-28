@@ -70,9 +70,9 @@ func (c Controller) SignUpHandler(db *gorm.DB) http.HandlerFunc {
 
 		if errInsert != nil {
 			log.Printf("Error while inserting the user into db: %v\n", errInsert)
-			err.Message = "Internal server error"
-			err.StatusCode = http.StatusInternalServerError
-			utils.RespondWithError(w, err)
+			// err.Message = "Internal server error"
+			// err.StatusCode = http.StatusInternalServerError
+			utils.RespondWithError(w, errInsert)
 			return
 		}
 
