@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"net/http"
+
+	"github.com/gorilla/mux"
 
 	"github.com/lazhari/web-jwt/utils"
 
@@ -41,6 +44,40 @@ func (c Controller) CreatePost(db *gorm.DB) http.HandlerFunc {
 			err.StatusCode = http.StatusInternalServerError
 
 			utils.RespondWithError(w, err)
+		}
+
+		utils.ResponseJSON(w, post)
+		return
+	}
+}
+
+// GetPostByID retrieve a post by ID
+func (c Controller) GetPostByID(db *gorm.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := &models.RequestError{}
+		vars := mux.Vars(r)
+
+		id := vars["id"]
+		if id == "" {
+			err.Message = "ID is required"
+			err.StatusCode = http.StatusBadRequest
+
+			utils.RespondWithError(w, err)
+		}
+
+		post := models.Post{}
+		dbc := db.First(&post, "id = ?", id)
+
+		if dbc.Error != nil {
+			if dbc.Error == sql.ErrNoRows {
+				err.Message = "The user does not exist!"
+				err.StatusCode = http.StatusNotFound
+			} else {
+				err.Message = dbc.Error.Error()
+				err.StatusCode = http.StatusInternalServerError
+			}
+			utils.RespondWithError(w, err)
+			return
 		}
 
 		utils.ResponseJSON(w, post)
