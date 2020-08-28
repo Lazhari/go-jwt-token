@@ -48,6 +48,11 @@ func main() {
 			handler: middleware.IsAuthenticated(controller.ProtectedHandler()),
 			method:  "GET",
 		},
+		{
+			path:    "/posts",
+			handler: middleware.IsAuthenticated(controller.CreatePost(db)),
+			method:  "POST",
+		},
 	}
 
 	for _, route := range routes {
