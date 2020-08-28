@@ -7,8 +7,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"github.com/lazhari/web-jwt/controllers"
 	"github.com/lazhari/web-jwt/driver"
+	"github.com/lazhari/web-jwt/handlers"
 	"github.com/lazhari/web-jwt/middleware"
 	"github.com/subosito/gotenv"
 )
@@ -28,7 +28,7 @@ type Route struct {
 
 func main() {
 	db = driver.ConnectDB()
-	controller := controllers.Controller{}
+	controller := handlers.Controller{}
 	r := mux.NewRouter()
 	r.Use(middleware.CommonMiddleware)
 
