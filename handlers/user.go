@@ -20,36 +20,19 @@ func (c Controller) SignUpHandler(db *gorm.DB) http.HandlerFunc {
 		err := &models.RequestError{}
 		json.NewDecoder(r.Body).Decode(&user)
 
-		if user.Email == "" {
-			err.Message = "Email is missing."
-			err.StatusCode = http.StatusBadRequest
-			utils.RespondWithError(w, err)
-			return
-		}
+		errV := user.Validate()
 
-		if user.FirstName == "" {
-			err.Message = "The first name is required."
-			err.StatusCode = http.StatusBadRequest
-			utils.RespondWithError(w, err)
-			return
-		}
-
-		if user.LastName == "" {
-			err.Message = "The last name is required."
-			err.StatusCode = http.StatusBadRequest
-			utils.RespondWithError(w, err)
+		if errV != nil {
+			utils.RespondWithError(w, &models.RequestError{
+				StatusCode:       http.StatusBadRequest,
+				Message:          "Invalid request",
+				ValidationErrors: errV,
+			})
 			return
 		}
 
 		if !utils.IsEmailValid(user.Email) {
 			err.Message = "Email is not valid."
-			err.StatusCode = http.StatusBadRequest
-			utils.RespondWithError(w, err)
-			return
-		}
-
-		if user.Password == "" {
-			err.Message = "Password is missing."
 			err.StatusCode = http.StatusBadRequest
 			utils.RespondWithError(w, err)
 			return
@@ -70,8 +53,6 @@ func (c Controller) SignUpHandler(db *gorm.DB) http.HandlerFunc {
 
 		if errInsert != nil {
 			log.Printf("Error while inserting the user into db: %v\n", errInsert)
-			// err.Message = "Internal server error"
-			// err.StatusCode = http.StatusInternalServerError
 			utils.RespondWithError(w, errInsert)
 			return
 		}
