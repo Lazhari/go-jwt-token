@@ -4,12 +4,16 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"github.com/lazhari/web-jwt/driver"
-	"github.com/lazhari/web-jwt/handlers"
+	"github.com/lazhari/web-jwt/api"
 	"github.com/lazhari/web-jwt/middleware"
+	userRepo "github.com/lazhari/web-jwt/repository/user"
+	"github.com/lazhari/web-jwt/user"
 	"github.com/subosito/gotenv"
 )
 
@@ -27,43 +31,65 @@ type Route struct {
 }
 
 func main() {
-	db = driver.ConnectDB()
-	controller := handlers.Controller{}
+	authRepo, err := userRepo.NewPostgreRepository()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	authService := user.NewAuthService(authRepo)
+	handler := api.NewHandler(authService)
+
 	r := mux.NewRouter()
 	r.Use(middleware.CommonMiddleware)
 
 	routes := []Route{
 		{
 			path:    "/sign-up",
-			handler: controller.SignUpHandler(db),
+			handler: handler.SignUp,
 			method:  "POST",
 		},
 		{
 			path:    "/login",
-			handler: controller.LoginHandler(db),
+			handler: handler.Login,
 			method:  "POST",
 		},
-		{
-			path:    "/protected",
-			handler: middleware.IsAuthenticated(controller.ProtectedHandler()),
-			method:  "GET",
-		},
-		{
-			path:    "/posts",
-			handler: middleware.IsAuthenticated(controller.CreatePost(db)),
-			method:  "POST",
-		},
-		{
-			path:    "/posts/{id}",
-			handler: middleware.IsAuthenticated(controller.GetPostByID(db)),
-			method:  "GET",
-		},
+		// {
+		// 	path:    "/protected",
+		// 	handler: middleware.IsAuthenticated(controller.ProtectedHandler()),
+		// 	method:  "GET",
+		// },
+		// {
+		// 	path:    "/posts",
+		// 	handler: middleware.IsAuthenticated(controller.CreatePost(db)),
+		// 	method:  "POST",
+		// },
+		// {
+		// 	path:    "/posts/{id}",
+		// 	handler: middleware.IsAuthenticated(controller.GetPostByID(db)),
+		// 	method:  "GET",
+		// },
 	}
 
 	for _, route := range routes {
 		r.HandleFunc(route.path, route.handler).Methods(route.method)
 	}
 
-	fmt.Println("Server running on port 8080...")
-	log.Fatal(http.ListenAndServe(":8050", r))
+	port := os.Getenv("PORT")
+
+	if len(port) == 0 {
+		port = "8050"
+	}
+
+	errs := make(chan error, 2)
+	go func() {
+		fmt.Printf("Listening on port http://localhost:%s\n", port)
+		errs <- http.ListenAndServe(":"+port, r)
+	}()
+
+	go func() {
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, syscall.SIGINT)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+	fmt.Printf("Terminated %s", <-errs)
 }
