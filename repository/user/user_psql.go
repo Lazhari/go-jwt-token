@@ -1,4 +1,4 @@
-package userRepo
+package userrepo
 
 import (
 	"database/sql"
@@ -32,7 +32,7 @@ func NewPostgreRepository() (user.Repository, error) {
 }
 
 // SignUp Create a user row in the users table
-func (pr postgresRepository) SignUp(user models.User) (models.User, error) {
+func (pr postgresRepository) SignUp(user *models.User) (*models.User, error) {
 	// stmt := "INSERT INTO users (email, password) values($1, $2) RETURNING id;"
 
 	// err := db.QueryRow(stmt, user.Email, user.Password).Scan(&user.ID)
@@ -60,7 +60,7 @@ func (pr postgresRepository) SignUp(user models.User) (models.User, error) {
 }
 
 // Login Get the user from the users table
-func (pr postgresRepository) Login(user models.User) (models.User, error) {
+func (pr postgresRepository) Login(user *models.User) (*models.User, error) {
 	// row := db.QueryRow("SELECT * FROM users WHERE email=$1", user.Email)
 	// err := row.Scan(&user.ID, &user.Email, &user.Password)
 

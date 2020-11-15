@@ -9,7 +9,6 @@ import (
 
 	"github.com/lazhari/web-jwt/models"
 	"github.com/lazhari/web-jwt/utils"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // UserHandler the user handler interface
@@ -29,37 +28,8 @@ func NewHandler(authSrv user.Service) UserHandler {
 
 // SignUpHandler The user sign up handler
 func (h *handler) SignUp(w http.ResponseWriter, r *http.Request) {
-	user := models.User{}
-	err := &models.RequestError{}
-	json.NewDecoder(r.Body).Decode(&user)
-
-	errV := user.Validate()
-
-	if errV != nil {
-		utils.RespondWithError(w, &models.RequestError{
-			StatusCode:       http.StatusBadRequest,
-			Message:          "Invalid request",
-			ValidationErrors: errV,
-		})
-		return
-	}
-
-	if !utils.IsEmailValid(user.Email) {
-		err.Message = "Email is not valid."
-		err.StatusCode = http.StatusBadRequest
-		utils.RespondWithError(w, err)
-		return
-	}
-
-	hash, errHash := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
-
-	if errHash != nil {
-		log.Printf("Error while hashing the password: %v\n", errHash)
-		err.Message = "Internal Server Error"
-		err.StatusCode = http.StatusInternalServerError
-		utils.RespondWithError(w, err)
-	}
-	user.Password = string(hash)
+	user := &models.User{}
+	json.NewDecoder(r.Body).Decode(user)
 
 	user, errInsert := h.authService.SignUp(user)
 
@@ -73,11 +43,11 @@ func (h *handler) SignUp(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
-	user := models.User{}
+	user := &models.User{}
 	jwt := models.JWT{}
 	error := &models.RequestError{}
 
-	json.NewDecoder(r.Body).Decode(&user)
+	json.NewDecoder(r.Body).Decode(user)
 
 	if user.Email == "" {
 		error.Message = "Email is missing."
@@ -113,7 +83,7 @@ func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user)
+	token, err := utils.GenerateToken(*user)
 
 	if err != nil {
 		error.Message = err.Error()
