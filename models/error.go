@@ -4,7 +4,7 @@ package models
 type RequestError struct {
 	Message          string `json:"message"`
 	StatusCode       int    `json:"status"`
-	ValidationErrors error  `json:"errors"`
+	ValidationErrors error  `json:"errors,omitempty"`
 }
 
 func (r *RequestError) Error() string {
