@@ -2,7 +2,6 @@ package driver
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/lazhari/web-jwt/models"
@@ -15,24 +14,18 @@ import (
 var db *gorm.DB
 
 // ConnectDB establish the database connection
-func ConnectDB() *gorm.DB {
-	dbConn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s",
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_USER"),
-		os.Getenv("DB_NAME"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_SSLMODE"),
-	)
+func ConnectDB() (*gorm.DB, error) {
+	dbURI := os.Getenv("DB_URI")
 
 	// Establish connection
-	db, err := gorm.Open("postgres", dbConn)
+	db, err := gorm.Open("postgres", dbURI)
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return nil, err
 	}
 
 	db.AutoMigrate(&models.User{}, &models.Post{})
 
-	return db
+	return db, nil
 }
