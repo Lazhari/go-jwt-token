@@ -20,8 +20,46 @@ func NewAuthService(userRepo Repository) Service {
 	}
 }
 
-func (authSrv *userService) Login(user *models.User) (*models.User, error) {
-	return authSrv.authRepo.Login(user)
+func (authSrv *userService) Login(user *models.User) (*models.JWT, error) {
+	resErr := &models.RequestError{}
+	jwt := models.JWT{}
+	if user.Email == "" {
+		resErr.Message = "Email is missing."
+		resErr.StatusCode = http.StatusBadRequest
+		return nil, resErr
+	}
+
+	if user.Password == "" {
+		resErr.Message = "Password is missing"
+		resErr.StatusCode = http.StatusBadRequest
+		return nil, resErr
+	}
+
+	password := user.Password
+	user, err := authSrv.authRepo.Login(user)
+
+	if err != nil {
+		return nil, err
+	}
+
+	hashedPassword := user.Password
+	ok := utils.ComparePasswords(hashedPassword, []byte(password))
+
+	if !ok {
+		resErr.Message = "Invalid credentials!"
+		resErr.StatusCode = http.StatusUnauthorized
+		return nil, resErr
+	}
+
+	token, err := utils.GenerateToken(*user)
+
+	if err != nil {
+		resErr.Message = err.Error()
+		resErr.StatusCode = http.StatusInternalServerError
+		return nil, resErr
+	}
+	jwt.Token = token
+	return &jwt, nil
 }
 
 func (authSrv *userService) SignUp(user *models.User) (*models.User, error) {
