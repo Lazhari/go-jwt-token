@@ -26,9 +26,13 @@ func (authSrv *userService) Login(user *models.User) (*models.User, error) {
 
 func (authSrv *userService) SignUp(user *models.User) (*models.User, error) {
 	err := &models.RequestError{}
-	Validationerr := user.Validate()
-	if Validationerr != nil {
-		return nil, Validationerr
+	validationErr := user.Validate()
+	if validationErr != nil {
+		return nil, &models.RequestError{
+			StatusCode:       http.StatusBadRequest,
+			Message:          "Invalid request",
+			ValidationErrors: validationErr,
+		}
 	}
 
 	if !utils.IsEmailValid(user.Email) {
