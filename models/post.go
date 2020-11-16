@@ -30,6 +30,6 @@ func (p Post) Validate() error {
 	return validation.ValidateStruct(&p,
 		// FirstName is require
 		validation.Field(&p.Title, validation.Required, validation.Length(3, 40)),
-		validation.Field(&p.Body, validation.Required, validation.Length(3, 40)),
+		validation.Field(&p.Body, validation.Required),
 	)
 }
