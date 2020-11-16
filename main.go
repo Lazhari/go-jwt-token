@@ -12,7 +12,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/lazhari/web-jwt/api"
 	"github.com/lazhari/web-jwt/middleware"
-	userRepo "github.com/lazhari/web-jwt/repository/user"
+	"github.com/lazhari/web-jwt/post"
+	"github.com/lazhari/web-jwt/repository"
 	"github.com/lazhari/web-jwt/user"
 	"github.com/subosito/gotenv"
 )
@@ -31,13 +32,15 @@ type Route struct {
 }
 
 func main() {
-	authRepo, err := userRepo.NewPostgreRepository()
+	repo, err := repository.NewPostgreRepository()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	authService := user.NewAuthService(authRepo)
-	handler := api.NewHandler(authService)
+	userService := user.NewAuthService(repo)
+	postService := post.NewPostService(repo)
+	userHandler := api.NewUserHandler(userService)
+	postHandler := api.NewPostHandler(postService)
 
 	r := mux.NewRouter()
 	r.Use(middleware.CommonMiddleware)
@@ -45,24 +48,19 @@ func main() {
 	routes := []Route{
 		{
 			path:    "/sign-up",
-			handler: handler.SignUp,
+			handler: userHandler.SignUp,
 			method:  "POST",
 		},
 		{
 			path:    "/login",
-			handler: handler.Login,
+			handler: userHandler.Login,
 			method:  "POST",
 		},
-		// {
-		// 	path:    "/protected",
-		// 	handler: middleware.IsAuthenticated(controller.ProtectedHandler()),
-		// 	method:  "GET",
-		// },
-		// {
-		// 	path:    "/posts",
-		// 	handler: middleware.IsAuthenticated(controller.CreatePost(db)),
-		// 	method:  "POST",
-		// },
+		{
+			path:    "/posts",
+			handler: middleware.IsAuthenticated(postHandler.CreatePost),
+			method:  "POST",
+		},
 		// {
 		// 	path:    "/posts/{id}",
 		// 	handler: middleware.IsAuthenticated(controller.GetPostByID(db)),
