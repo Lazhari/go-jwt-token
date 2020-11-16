@@ -17,17 +17,17 @@ type UserHandler interface {
 	Login(http.ResponseWriter, *http.Request)
 }
 
-type handler struct {
+type userHandler struct {
 	authService user.Service
 }
 
-// NewHandler Creates a new http handler
-func NewHandler(authSrv user.Service) UserHandler {
-	return &handler{authService: authSrv}
+// NewUserHandler Creates a new http handler
+func NewUserHandler(authSrv user.Service) UserHandler {
+	return &userHandler{authService: authSrv}
 }
 
 // SignUpHandler The user sign up handler
-func (h *handler) SignUp(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{}
 	json.NewDecoder(r.Body).Decode(user)
 
@@ -42,7 +42,7 @@ func (h *handler) SignUp(w http.ResponseWriter, r *http.Request) {
 	utils.ResponseJSON(w, user)
 }
 
-func (h *handler) Login(w http.ResponseWriter, r *http.Request) {
+func (h *userHandler) Login(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{}
 
 	json.NewDecoder(r.Body).Decode(user)
