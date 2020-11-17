@@ -40,9 +40,19 @@ func (p *postHandler) CreatePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.ResponseJSON(w, post)
-	return
 }
 
 func (p *postHandler) GetAllPosts(w http.ResponseWriter, r *http.Request) {
+	errResp := models.RequestError{}
 
+	posts, err := p.postService.GetAll()
+
+	if err != nil {
+		errResp.Message = "Something went wrong"
+		errResp.StatusCode = http.StatusInternalServerError
+		utils.RespondWithError(w, &errResp)
+		return
+	}
+
+	utils.ResponseJSON(w, posts)
 }

@@ -13,5 +13,12 @@ func (pr postgresRepository) CreatePost(p *models.Post) (*models.Post, error) {
 }
 
 func (pr postgresRepository) GetAllPosts() ([]models.Post, error) {
-	return nil, nil
+	var posts []models.Post
+	result := pr.db.Find(&posts)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return posts, nil
 }

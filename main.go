@@ -61,6 +61,11 @@ func main() {
 			handler: middleware.IsAuthenticated(postHandler.CreatePost),
 			method:  "POST",
 		},
+		{
+			path:    "/posts",
+			handler: middleware.IsAuthenticated(postHandler.GetAllPosts),
+			method:  "GET",
+		},
 		// {
 		// 	path:    "/posts/{id}",
 		// 	handler: middleware.IsAuthenticated(controller.GetPostByID(db)),
